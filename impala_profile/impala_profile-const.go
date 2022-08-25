@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-var buildInFieldList = []string{"timestamp", "domain", "host", "path", "logLevel", "eventName", "threadName", "profile", "extend", "processors"}
+var buildInFieldList = []string{"timestamp", "domain", "host", "path", "logLevel", "eventName", "threadName", "profile", "extend"}
 var buildInFieldListStr = strings.Join(buildInFieldList[:], ",")
 
 const (
@@ -23,14 +23,13 @@ var instanceID = atomic.MakeUint32(0)
 // target_fields:timestamp,domain,host,path,logLevel,eventName,threadName,profile,extend
 // config defines the configuration for this processor.
 type config struct {
-	Field           string        `config:"field" validate:"required"`
-	Target          []string      `config:"target_fields"`
-	Const           common.MapStr `config:"const_mappings"`
-	ProcessorsField string        `config:"processors_field"`
-	OverwriteKeys   bool          `config:"overwrite_keys"`
-	IgnoreMissing   bool          `config:"ignore_missing"`
-	IgnoreFailure   bool          `config:"ignore_failure"`
-	Tag             string        `config:"tag"`
+	Field         string        `config:"field" validate:"required"`
+	Target        string        `config:"target_field"`
+	Const         common.MapStr `config:"const_mappings"`
+	OverwriteKeys bool          `config:"overwrite_keys"`
+	IgnoreMissing bool          `config:"ignore_missing"`
+	IgnoreFailure bool          `config:"ignore_failure"`
+	Tag           string        `config:"tag"`
 }
 
 // processor defines a syslog processor.

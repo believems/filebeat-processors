@@ -24,14 +24,12 @@ import (
 	"github.com/believems/filebeat-processors/impala_profile/decoder"
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/common/jsontransform"
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/beats/v7/libbeat/processors/checks"
 	jsprocessor "github.com/elastic/beats/v7/libbeat/processors/script/javascript/module/processor"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/elastic/elastic-agent-libs/monitoring"
-	"github.com/elastic/go-sysinfo"
 	"strconv"
 )
 
@@ -44,7 +42,7 @@ func init() {
 			),
 			checks.AllowedFields(
 				"field",
-				"target_fields",
+				"target_field",
 				"overwrite_keys",
 				"ignore_missing",
 				"ignore_failure",
@@ -60,15 +58,15 @@ func init() {
 func defaultConfig() config {
 
 	return config{
-		Field: "message",
+		Field:  "message",
+		Target: procName,
 		Const: common.MapStr{
 			"domain":     "Impala",
 			"logLevel":   "INFO",
 			"eventName":  "Profile",
 			"threadName": "MAIN",
 		},
-		ProcessorsField: "processors." + procName,
-		OverwriteKeys:   true,
+		OverwriteKeys: true,
 	}
 }
 
@@ -89,19 +87,6 @@ func New(c *common.Config) (processors.Processor, error) {
 		registryName = logName + "." + cfg.Tag + "-" + strconv.Itoa(id)
 	}
 	registry := monitoring.Default.NewRegistry(registryName, monitoring.DoNotReport)
-	if cfg.Target == nil {
-		cfg.Target = buildInFieldList
-	} else {
-		for _, field := range cfg.Target {
-			if !stringInSlice(field, buildInFieldList) {
-				return nil, fmt.Errorf("field[%s] is not a enum of buildIn[%s]", field, buildInFieldListStr)
-			}
-		}
-	}
-	err := tryFillHostName(cfg)
-	if err != nil {
-		return nil, err
-	}
 	return &processor{
 		config: cfg,
 		log:    log,
@@ -111,40 +96,6 @@ func New(c *common.Config) (processors.Processor, error) {
 			Missing: monitoring.NewInt(registry, "missing"),
 		},
 	}, nil
-}
-
-func tryFillHostName(cfg config) error {
-	key := "host"
-	if !stringInSlice(key, cfg.Target) {
-		return nil
-	}
-	hasKey, err := cfg.Const.HasKey(key)
-	if err != nil {
-		return nil
-	}
-	buildHostname := false
-	if hasKey {
-		value, err := cfg.Const.GetValue(key)
-		if err != nil {
-			return nil
-		}
-		if value == nil || len(value.(string)) == 0 {
-			buildHostname = true
-		}
-	} else {
-		buildHostname = true
-	}
-	if buildHostname {
-		h, err := sysinfo.Host()
-		if err != nil {
-			return err
-		}
-		_, err = cfg.Const.Put(key, h.Info().Hostname)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 // Run will process an event and will update the fields based on the parsed message, or an error if the
@@ -182,46 +133,20 @@ func (p *processor) run(event *beat.Event) error {
 		return fmt.Errorf("type of field %q is not a string", p.Field)
 	}
 	impalaProfile, err := decoder.DecodeImpalaProfileLine(data)
-	fields, err := p.buildTargetMap(impalaProfile)
 	if err != nil {
 		p.stats.Failure.Inc()
 	} else {
 		p.stats.Success.Inc()
 	}
-
-	jsontransform.WriteJSONKeys(event, fields, false, p.OverwriteKeys, !p.IgnoreFailure)
-
-	return err
-}
-
-func stringInSlice(a string, list []string) bool {
-	for _, b := range list {
-		if b == a {
-			return true
-		}
-	}
-	return false
-}
-
-// timestamp,domain,host,path,logLevel,eventName,threadName,profile,extend
-func (p *processor) buildTargetMap(profile *decoder.ImpalaProfile) (common.MapStr, error) {
-	fields, err := profile.StringMap()
-	fields.DeepUpdate(p.Const)
+	valueMap, err := impalaProfile.StringMap()
 	if err != nil {
-		return nil, err
+		p.stats.Failure.Inc()
+	} else {
+		p.stats.Success.Inc()
 	}
-	fields.Put("extend", profile.QueryId)
-	fields.Put(p.ProcessorsField, true)
-	var removedField []string
-	for field := range fields {
-		if !stringInSlice(field, p.Target) {
-			removedField = append(removedField, field)
-		}
-	}
-	for _, field := range removedField {
-		fields.Delete(field)
-	}
-	return fields, nil
+	valueMap.DeepUpdate(p.Const)
+	event.PutValue(p.Target, valueMap)
+	return err
 }
 
 // String will return a string representation of this processor (the configuration).

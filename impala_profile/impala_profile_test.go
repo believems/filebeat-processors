@@ -25,7 +25,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/elastic-agent-libs/mapstr"
 )
 
 // mustParseTime will parse value into a time.Time using the provided layout. If value
@@ -70,46 +69,25 @@ var impalaProfileCases = map[string]struct {
 	wantErr  bool
 }{
 	"impala_profile_default": {
-		cfg: common.MustNewConfigFrom(mapstr.M{
-			"target_fields": []string{"timestamp", "domain", "path", "logLevel", "eventName", "threadName", "profile", "extend"},
-		}),
+		cfg: common.MustNewConfigFrom(common.MapStr{}),
 		in: common.MapStr{
 			"message": rawLine,
 		},
 		want: common.MapStr{
-			"domain":     "Impala",
-			"eventName":  "Profile",
-			"extend":     queryId,
-			"logLevel":   "INFO",
-			"message":    rawLine,
-			"profile":    profile,
-			"threadName": "MAIN",
-			"timestamp":  timestamp,
-		},
-	},
-	"impala_profile_custom_target": {
-		cfg: common.MustNewConfigFrom(mapstr.M{
-			"target_fields": []string{"timestamp", "profile", "extend"},
-			"const_mappings": mapstr.M{
+			"impala_profile": common.MapStr{
+				"timestamp":  timestamp,
+				"query_id":   queryId,
+				"profile":    profile,
 				"domain":     "Impala",
-				"logLevel":   "DEBUG",
 				"eventName":  "Profile",
+				"logLevel":   "INFO",
 				"threadName": "MAIN",
 			},
-		}),
-		in: common.MapStr{
 			"message": rawLine,
 		},
-		want: common.MapStr{
-			"extend":    queryId,
-			"message":   rawLine,
-			"profile":   profile,
-			"timestamp": timestamp,
-		},
 	},
-	"impala_profile_custom_target2": {
+	"impala_profile_custom_mapping": {
 		cfg: common.MustNewConfigFrom(common.MapStr{
-			"target_fields": []string{"timestamp", "profile", "extend", "domain"},
 			"const_mappings": common.MapStr{
 				"domain":     "Impala",
 				"logLevel":   "DEBUG",
@@ -121,11 +99,16 @@ var impalaProfileCases = map[string]struct {
 			"message": rawLine,
 		},
 		want: common.MapStr{
-			"extend":    queryId,
-			"message":   rawLine,
-			"profile":   profile,
-			"timestamp": timestamp,
-			"domain":    "Impala",
+			"impala_profile": common.MapStr{
+				"timestamp":  timestamp,
+				"query_id":   queryId,
+				"profile":    profile,
+				"domain":     "Impala",
+				"eventName":  "Profile",
+				"logLevel":   "DEBUG",
+				"threadName": "MAIN",
+			},
+			"message": rawLine,
 		},
 	},
 }
