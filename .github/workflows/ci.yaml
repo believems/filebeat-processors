@@ -14,7 +14,7 @@ jobs:
       - name: Checkout Processors
         uses: actions/checkout@v2
         with:
-          repository: 'ytpay/filebeat-processors'
+          repository: 'believems/filebeat-processors'
           path: 'filebeat-processors'
           submodules: 'true'
       - name: Read Filebeat Version
@@ -30,17 +30,23 @@ jobs:
       - name: "Setup Golang"
         uses: actions/setup-go@v2
         with:
-          go-version: '^1.16.0'
+          go-version: '^1.19.0'
       - name: "Install gox"
         working-directory: "${{ env.GITHUB_WORKSPACE }}"
         run: |
           go install github.com/mitchellh/gox@latest
       - name: "Build Processor"
+        env:
+          ACCESS_TOKEN: ${{ secrets.CI_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
+          GOPRIVATE: github.com/believems/filebeat-processors
+          GH_ACCESS_TOKEN: ${{ secrets.CI_TOKEN }}
         working-directory: ./beats
         run: |
           git checkout -b ${FILEBEAT_VERSION} ${FILEBEAT_VERSION}
           cat ../filebeat-processors/import.txt >> libbeat/cmd/instance/imports_common.go
-          go get github.com/ytpay/filebeat-processors@${GITHUB_SHA}
+          git config --global url.https://$GH_ACCESS_TOKEN@github.com/.insteadOf https://github.com/
+          go get github.com/believems/filebeat-processors@${GITHUB_SHA}
           (cd filebeat && make crosscompile && mv build/bin ${GITHUB_WORKSPACE}/artifacts)
           echo "ARTIFACTS_PATH=${GITHUB_WORKSPACE}/artifacts/*" >> ${GITHUB_ENV}
       - name: "Create Release"

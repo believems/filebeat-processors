@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION=${1:-"v7.11.1"}
+VERSION=${1:-"v7.17.6"}
 
 rm -rf build
 
