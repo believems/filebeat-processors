@@ -12,7 +12,7 @@ jobs:
       GO111MODULE: 'on'
     steps:
       - name: Checkout Processors
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: 'believems/filebeat-processors'
           path: 'filebeat-processors'
@@ -21,14 +21,14 @@ jobs:
         run: "echo FILEBEAT_VERSION=$(cat filebeat-version) >> ${GITHUB_ENV}"
         working-directory: ./filebeat-processors
       - name: Checkout Filebeat
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: 'elastic/beats'
           ref: "${{ env.FILEBEAT_VERSION }}"
           path: 'beats'
           submodules: 'true'
       - name: "Setup Golang"
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: '^1.19.0'
       - name: "Install gox"

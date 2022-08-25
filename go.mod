@@ -3,22 +3,23 @@ module github.com/believems/filebeat-processors
 go 1.19
 
 require (
-	github.com/apache/thrift v0.13.1-0.20200603211036-eac4d0c79a5f
-	github.com/believems/impala-thrift v0.13.1
+	github.com/believems/impala-profile-decode v0.13.1
 	github.com/elastic/beats/v7 v7.17.6
 	github.com/elastic/elastic-agent-libs v0.2.11
-	github.com/elastic/go-sysinfo v1.8.1
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0
 )
 
 require (
+	github.com/apache/thrift v0.13.1-0.20200603211036-eac4d0c79a5f // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
+	github.com/believems/impala-thrift v0.13.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.1.7-0.20171009020623-7632a260cbaf // indirect
 	github.com/dop251/goja v0.0.0-20200831102558-9af81ddcf0e1 // indirect
 	github.com/dop251/goja_nodejs v0.0.0-20171011081505-adff31b136e6 // indirect
 	github.com/elastic/elastic-agent-client/v7 v7.0.0-20210727140539-f0905d9377f6 // indirect
+	github.com/elastic/go-sysinfo v1.8.1 // indirect
 	github.com/elastic/go-ucfg v0.8.6 // indirect
 	github.com/elastic/go-windows v1.0.1 // indirect
 	github.com/fatih/color v1.13.0 // indirect
