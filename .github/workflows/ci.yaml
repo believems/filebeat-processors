@@ -48,6 +48,7 @@ jobs:
           cat ../filebeat-processors/import.txt >> libbeat/cmd/instance/imports_common.go
           git config --global url.https://$GH_ACCESS_TOKEN@github.com/.insteadOf https://github.com/
           go get github.com/believems/filebeat-processors@${GITHUB_SHA}
+          go mod tidy
           (cd filebeat && make crosscompile && mv build/bin ${GITHUB_WORKSPACE}/artifacts)
           echo "ARTIFACTS_PATH=${GITHUB_WORKSPACE}/artifacts/*" >> ${GITHUB_ENV}
       - name: "Create Release"

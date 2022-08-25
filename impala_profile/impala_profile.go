@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/believems/filebeat-processors/impala_profile/decoder"
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/common/jsontransform"
@@ -180,7 +181,7 @@ func (p *processor) run(event *beat.Event) error {
 		p.stats.Failure.Inc()
 		return fmt.Errorf("type of field %q is not a string", p.Field)
 	}
-	impalaProfile, err := DecodeImpalaProfileLine(data)
+	impalaProfile, err := decoder.DecodeImpalaProfileLine(data)
 	fields, err := p.buildTargetMap(impalaProfile)
 	if err != nil {
 		p.stats.Failure.Inc()
@@ -203,7 +204,7 @@ func stringInSlice(a string, list []string) bool {
 }
 
 // timestamp,domain,host,path,logLevel,eventName,threadName,profile,extend
-func (p *processor) buildTargetMap(profile *ImpalaProfile) (common.MapStr, error) {
+func (p *processor) buildTargetMap(profile *decoder.ImpalaProfile) (common.MapStr, error) {
 	fields, err := profile.StringMap()
 	fields.DeepUpdate(p.Const)
 	if err != nil {

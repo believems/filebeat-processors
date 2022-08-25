@@ -1,4 +1,4 @@
-package impala_profile
+package decoder
 
 import (
 	"encoding/json"
