@@ -1,6 +1,6 @@
 # filebeat-processors
 
-> 一些适用于特定业务的 filebeat 自定义 processor
+> 一些适用于特定业务的 filebeat 自定义 processor,不支持v8版本
 
 ## 一、编译
 
