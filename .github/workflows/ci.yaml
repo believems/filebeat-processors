@@ -50,6 +50,7 @@ jobs:
           go get github.com/believems/filebeat-processors@${GITHUB_SHA}
           go mod tidy
           sed -i  's/GOX_OS?=linux darwin windows freebsd netbsd openbsd/GOX_OS?=linux/' libbeat/scripts/Makefile
+          sed -i 's#GOX_OSARCH?=!darwin/arm !darwin/arm64 !darwin/386#GOX_OSARCH?=amd64#' libbeat/scripts/Makefile
           (cd filebeat && make crosscompile && mv build/bin ${GITHUB_WORKSPACE}/artifacts)
           echo "ARTIFACTS_PATH=${GITHUB_WORKSPACE}/artifacts/*" >> ${GITHUB_ENV}
       - name: "Create Release"
