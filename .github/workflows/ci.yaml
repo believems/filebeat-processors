@@ -49,6 +49,7 @@ jobs:
           git config --global url.https://$GH_ACCESS_TOKEN@github.com/.insteadOf https://github.com/
           go get github.com/believems/filebeat-processors@${GITHUB_SHA}
           go mod tidy
+          sed -i  's/GOX_OS?=linux darwin windows freebsd netbsd openbsd/GOX_OS?=linux/' libbeat/scripts/Makefile
           (cd filebeat && make crosscompile && mv build/bin ${GITHUB_WORKSPACE}/artifacts)
           echo "ARTIFACTS_PATH=${GITHUB_WORKSPACE}/artifacts/*" >> ${GITHUB_ENV}
       - name: "Create Release"
